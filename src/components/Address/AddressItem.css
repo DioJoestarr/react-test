@@ -1,0 +1,13 @@
+.address-item{
+    
+}
+.address-section > div:first-child {
+  display: flex;
+  align-items: center;
+  color: rgb(107 114 128);
+}
+.address-section > p {
+  font-weight: 500;
+  margin-top: 8px;
+
+}
