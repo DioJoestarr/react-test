@@ -121,7 +121,7 @@ const UpsertFormAddress = ({
       <Card className="p-0">
         <CardBody>
           <div className=" border-bottom py-3 fw-bold mb-3  text-center">
-            Thêm mới địa chỉ
+            {type === "create"? "Thêm mới địa chỉ":"Chỉnh sửa địa chỉ"}
           </div>
           <form onSubmit={handleSubmit(handleSubmitForm)}>
             <FormInput
