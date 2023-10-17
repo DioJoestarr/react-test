@@ -4,7 +4,7 @@ import { getNextPage } from "../../utils/pageHelper";
 import instance from "../../utils/instance";
 import { ApiResponsePage } from "../../types/api";
 import { Address } from "../../types/address";
-//Code dùng để phân trang theo kiểu scroll load more nhưng sau khi test update thì phát hiện api khi update không thật sự update trên server nên không dùng đc
+//Code dùng để phân trang theo kiểu scroll load more 
 const useAdressList = () => {
   const query = useInfiniteQuery(
     ["address-list"],
@@ -19,6 +19,7 @@ const useAdressList = () => {
       getNextPageParam: getNextPage,
     }
   );
+
   const data = useMemo(
     () => query?.data?.pages.flatMap((el) => el?.data),
     [query?.data?.pages]

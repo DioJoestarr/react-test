@@ -1,21 +1,20 @@
+import { useEffect, useState } from "react";
 
-import { useEffect } from "react";
-
-import { useUser } from "../store/UserStore";
 import { useNavigate } from "react-router-dom";
+import JwtService from "../services/JwtService";
 
 export const withAuth = (WrappedComponent, redirectTo) => {
   const WithAuthRedirectComponent = (props) => {
     const navigate = useNavigate();
-    const  user = useUser();
-    console.log(user)
+    const [loading, setLoading] = useState(true);
     useEffect(() => {
-      if (user) return;
+      setLoading(false);
+      if (JwtService.getAccessToken()) return;
       // toast.error("Phiên đăng nhập hết hạn");
       navigate(redirectTo || "/login");
-    }, [user]);
-    if (!user) return <></>;
-    return <WrappedComponent {...props} user={user} />;
+    }, []);
+    if (loading) return <></>;
+    return <WrappedComponent {...props} />;
   };
   return WithAuthRedirectComponent;
 };

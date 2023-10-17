@@ -6,9 +6,10 @@ import FormInput from "../ui/AppFormInput/FormInput";
 import instance from "../utils/instance";
 import { ApiResponse } from "../types/api";
 import { UserAuthData } from "../types/user";
-import { useSetUser } from "../store/UserStore";
 import JwtService from "../services/JwtService";
 import { Container } from "react-bootstrap";
+import { AxiosResponse } from "axios";
+import { useNavigate } from "react-router-dom";
 
 type LoginFormType = {
   id: string;
@@ -17,8 +18,9 @@ type LoginFormType = {
 };
 //báo lỗi These credentials do not match our records nên không dùng được, phải gán cứng jwt
 function Login() {
-  const setUser = useSetUser();
-  const { register, control } = useForm<LoginFormType>({
+
+  const navigate = useNavigate();
+  const { register, control, watch } = useForm<LoginFormType>({
     defaultValues: {
       id: "0869017747",
       name: "Phát",
@@ -27,10 +29,13 @@ function Login() {
   });
   const handleLogin = async () => {
     instance
-      .post<LoginFormType, ApiResponse<UserAuthData>>("/sign-up-zalo")
+      .post<LoginFormType, AxiosResponse<ApiResponse<UserAuthData>>>(
+        "/sign-up-zalo",
+        watch()
+      )
       .then(({ data }) => {
-        JwtService.setToken(data.token);
-        setUser(data);
+        JwtService.setToken(data.data.token);
+        navigate("/address");
       });
   };
   return (

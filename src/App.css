@@ -18,7 +18,9 @@
   -webkit-text-size-adjust: 100%;
   border-radius: 10px;
 }
-
+.max-w-400 {
+  max-width: 400px !important;
+}
 .logo {
   height: 6em;
   padding: 1.5em;

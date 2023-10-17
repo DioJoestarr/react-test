@@ -33,14 +33,15 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>((props, ref) => {
       {...rest}
       render={({ field, formState: { errors } }) => {
         const { name, onChange} = field;
+       
         return (
           <Form.Group className={className}>
             {label && <Form.Label className={classNames(rest.rules?.required && "required")}>{label}</Form.Label>}
-            {/* <div className={classNames(containerInputClassName)}> */}
+         
             <InputWraper>
               <Form.Control
                 {...field}
-                // className={classNames(inpu)}
+            
                 onChange={onChange}
                 {...inputProps}
               />

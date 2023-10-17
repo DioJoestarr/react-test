@@ -1,6 +1,4 @@
-import FormInput from "../ui/AppFormInput/FormInput";
 
-import useAddressUpdate from "../hooks/Address/useAddressUpdate";
 import {
   useAddressValue,
 } from "../store/AddressStore";
@@ -9,6 +7,7 @@ import React, { useMemo } from "react";
 import { AddressForm } from "../types/address";
 import { useParams } from "react-router-dom";
 import UpsertFormAddress from "../components/UpsertFormAddress";
+import { withAuth } from "../hocs/withAuth";
 
 function EditAddress() {
   const { addressId } = useParams();
@@ -17,7 +16,7 @@ function EditAddress() {
   if (!addressId) return <></>;
   const addressDetail = useMemo(() => {
     if (!value) return undefined;
-    return value.data?.find((item) => {
+    return value?.find((item) => {
       return item.xid == addressId;
     });
   }, [value, addressId]);
@@ -33,4 +32,4 @@ function EditAddress() {
   );
 }
 
-export default EditAddress;
+export default withAuth(EditAddress);

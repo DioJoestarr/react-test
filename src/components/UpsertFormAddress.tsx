@@ -1,10 +1,10 @@
 import React, { useMemo } from "react";
-import { Card, CardBody, CardHeader } from "react-bootstrap";
+import { Card, CardBody } from "react-bootstrap";
 import { useForm } from "react-hook-form";
 import FormInput from "../ui/AppFormInput/FormInput";
 import FormSelect from "../ui/AppFormInput/FormSelect";
 
-import { AddressForm } from "../types/address";
+import { Address, AddressForm } from "../types/address";
 import useAddressCreate from "../hooks/Address/useAddressCreate";
 import useProvinces from "../hooks/Common/useProvinces";
 
@@ -12,8 +12,8 @@ import useAddressUpdate from "../hooks/Address/useAddressUpdate";
 
 import useDistricts from "../hooks/Common/useDistricts";
 import { useNavigate } from "react-router-dom";
-import { useQueryClient } from "react-query";
-
+import { InfiniteData, useQueryClient } from "react-query";
+import { ApiResponsePage } from "../types/api";
 
 const UpsertFormAddress = ({
   type,
@@ -34,7 +34,7 @@ const UpsertFormAddress = ({
         },
   });
   const navigate = useNavigate();
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
   const { data: provinces } = useProvinces();
 
   const selectedProvince = useMemo(() => {
@@ -43,6 +43,7 @@ const UpsertFormAddress = ({
   const { data: districts } = useDistricts(selectedProvince);
   const { mutate } = useAddressCreate();
   const { mutate: mutateUpdate } = useAddressUpdate(updateId);
+  //vì api chỉ nhận tên tỉnh chứ ko lấy id nên phải so sánh value bằng tên, một vài address có tỉnh ko match với trên api tỉnh sẽ không hiện đc.
   const provinceSelectList = useMemo(() => {
     const modifieldData = provinces?.map((item) => ({
       value: item.name,
@@ -57,41 +58,72 @@ const UpsertFormAddress = ({
     }));
     return modifieldData;
   }, [districts]);
+  const handleSubmitForm = (data) => {
+    if (type === "create") {
+      mutate(data, {
+        onSuccess(data) {
+          //cập nhật list bên trang address mà không cần gọi request lại api
+          queryClient.setQueryData<InfiniteData<ApiResponsePage<Address>>>(
+            "address-list",
+            (oldData): any => {
+              const newElem = {
+                ...watch(),
+                xid: data.data.xid,
+              } as Address;
+              const currentList = oldData?.pages.at(0);
+              if (currentList) {
+                currentList.data = [newElem, ...currentList.data];
+              }
+              return {
+                ...oldData,
+              };
+            }
+          );
+          navigate("/address");
+        },
+      });
+    } else {
+      mutateUpdate(data, {
+        onSuccess(data, variables, context) {
+          //cập nhật list bên trang address mà không cần gọi request lại api
+          queryClient.setQueryData<InfiniteData<ApiResponsePage<Address>>>(
+            "address-list",
+            (oldData): any => {
+              const newData = oldData?.pages.map((page) => {
+                const newList = page.data.map((item) => {
+                  if (item.xid === updateId) {
+                    return {
+                      ...watch(),
+                    };
+                  } else {
+                    return item;
+                  }
+                });
+                return {
+                  ...page,
+                  data: newList,
+                };
+              });
+              return {
+                ...oldData,
+                pages: newData,
+              };
+            }
+          );
+          navigate("/address");
+        },
+      });
+    }
+  };
 
   return (
-    <div>
+    <div className="m-auto max-w-400">
       <Card className="p-0">
         <CardBody>
           <div className=" border-bottom py-3 fw-bold mb-3  text-center">
             Thêm mới địa chỉ
           </div>
-          <form
-            onSubmit={handleSubmit((data) => {
-              if (type === "create") {
-                mutate(data, {
-                  onSuccess(data, variables, context) {},
-                });
-              } else {
-                mutateUpdate(data, {
-                  onSuccess(data, variables, context) {
-                    // setAddress((prev) => {
-                    //   return prev.data.map((item) => {
-                    //     const { zipcode, ...newValue } = watch();
-                    //     return {
-                    //       ...newValue,
-                    //     };
-                    //   });
-                    // });
-                    queryClient.setQueryData("address-list",()=>{
-                      
-                    })
-                    navigate("/address");
-                    console.log("đâsd");
-                  },
-                });
-              }
-            })}
-          >
+          <form onSubmit={handleSubmit(handleSubmitForm)}>
             <FormInput
               label="Họ và tên"
               rules={{ required: "Vui lòng nhập họ và tên", maxLength: 50 }}
@@ -101,15 +133,33 @@ const UpsertFormAddress = ({
             <FormInput
               label="Số điện thoại"
               rules={{
-                required: "Vui lòng nhập phố điện thoại",
+                required: "Vui lòng nhập số điện thoại",
                 maxLength: 10,
+                validate: {
+                  checkPhone: (v) => {
+                    return (
+                      /(84|0[3|5|7|8|9])+([0-9]{8})\b/g.test(v) ||
+                      "Vui lòng nhập đúng định dạng SDT"
+                    );
+                  },
+                },
               }}
               control={control}
               {...register("phone")}
             />
             <FormInput
               label="Địa chỉ Email"
-              rules={{ required: "Vui lòng nhập email", maxLength: 50 }}
+              rules={{
+                required: "Vui lòng nhập email",
+                validate: {
+                  checkEmail: (v) => {
+                    return (
+                      /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(v) ||
+                      "Vui lòng nhập đúng định dạng email"
+                    );
+                  },
+                },
+              }}
               control={control}
               {...register("email")}
             />
