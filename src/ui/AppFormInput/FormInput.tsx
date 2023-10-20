@@ -41,7 +41,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>((props, ref) => {
             <InputWraper>
               <Form.Control
                 {...field}
-            
+
                 onChange={onChange}
                 {...inputProps}
               />

@@ -70,7 +70,7 @@ const UpsertFormAddress = ({
                 ...watch(),
                 xid: data.data.xid,
               } as Address;
-              const currentList = oldData?.pages.at(0);
+              const currentList = oldData?.pages[0];
               if (currentList) {
                 currentList.data = [newElem, ...currentList.data];
               }
@@ -117,11 +117,11 @@ const UpsertFormAddress = ({
   };
 
   return (
-    <div className="m-auto max-w-400">
+    <div className="m-auto max-w-400 py-3">
       <Card className="p-0">
         <CardBody>
-          <div className=" border-bottom py-3 fw-bold mb-3  text-center">
-            {type === "create"? "Thêm mới địa chỉ":"Chỉnh sửa địa chỉ"}
+          <div className=" border-bottom pb-3 fw-bold mb-3  text-center">
+            {type === "create" ? "Thêm mới địa chỉ" : "Chỉnh sửa địa chỉ"}
           </div>
           <form onSubmit={handleSubmit(handleSubmitForm)}>
             <FormInput
@@ -130,11 +130,16 @@ const UpsertFormAddress = ({
               control={control}
               {...register("name")}
             />
+
             <FormInput
               label="Số điện thoại"
+              inputProps={{
+                type:"number"
+              }}
               rules={{
                 required: "Vui lòng nhập số điện thoại",
                 maxLength: 10,
+
                 validate: {
                   checkPhone: (v) => {
                     return (
